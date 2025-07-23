@@ -1,11 +1,12 @@
 ﻿using Medi8R.Library.Interfaces;
 
-namespace Medi8R.Library.Tests.Stubs;
-
-public class StubRequestHandler : IRequestHandler<StubRequest, string>
+namespace Medi8R.Library.Tests.Stubs
 {
-    public Task<string> Handle(StubRequest request)
+    public class StubRequestHandler : IRequestHandler<StubRequest, string>
     {
-        return Task.FromResult($"Handled: {request.Input}");
+        public Task<string> Handle(StubRequest request)
+        {
+            return Task.FromResult($"Handled: {request.Input}");
+        }
     }
 }

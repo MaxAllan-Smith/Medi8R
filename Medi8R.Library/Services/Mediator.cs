@@ -55,5 +55,39 @@ namespace Medi8R.Library.Services
         {
             return Send<Unit>(request);
         }
+
+        public async Task Publish(INotification notification)
+        {
+            if (notification is null)
+            {
+                throw new ArgumentNullException(nameof(notification));
+            }
+
+            Type handlerType = typeof(INotificationHandler<>).MakeGenericType(notification.GetType());
+
+            object? resolved = serviceFactory(handlerType);
+            if (resolved is null)
+            {
+                return;
+            }
+
+            IEnumerable<object> handlers = resolved switch
+            {
+                IEnumerable<object> collection => collection,
+                not null => [resolved],
+                _ => throw new InvalidOperationException("Invalid handler resolution result")
+            };
+
+            foreach (object handler in handlers)
+            {
+                MethodInfo? handleMethod = handler.GetType().GetMethod("Handle");
+
+                if (handleMethod?.Invoke(handler, [notification]) is Task task)
+                {
+                    await task;
+                }
+            }
+        }
+
     }
 }
