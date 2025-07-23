@@ -45,5 +45,30 @@ namespace Medi8R.Library.Tests
 
             Assert.That(ex.Message, Does.Contain("Handler not found"));
         }
+
+        [Test]
+        public void Send_ThrowsIfMultipleHandlersExist()
+        {
+            StubRequest request = new("duplicate");
+
+            IMediator mediator = new Mediator(type =>
+            {
+                if (type == typeof(IRequestHandler<StubRequest, string>))
+                {
+                    return new List<object>
+                    {
+                        new StubRequestHandler(),
+                        new StubRequestHandler()
+                    };
+                }
+
+                return null!;
+            });
+
+            InvalidOperationException ex = Assert.ThrowsAsync<InvalidOperationException>(() =>
+                mediator.Send(request));
+
+            Assert.That(ex.Message, Does.Contain("Multiple"));
+        }
     }
 }
