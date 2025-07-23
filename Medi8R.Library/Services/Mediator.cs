@@ -25,7 +25,6 @@ namespace Medi8R.Library.Services
 
             object? handler = resolved;
 
-            // If serviceFactory returns a collection, unwrap and validate
             if (resolved is IEnumerable<object> collection)
             {
                 object[] items = collection.ToArray();
@@ -43,13 +42,18 @@ namespace Medi8R.Library.Services
                 throw new InvalidOperationException("Handler does not implement Handle method");
             }
 
-            object? result = handleMethod.Invoke(handler, [request]);
+            object? result = handleMethod.Invoke(handler, new[] { request });
             if (result is not Task<TResponse> task)
             {
                 throw new InvalidOperationException("Handler returned unexpected result type");
             }
 
             return task;
+        }
+
+        public Task<Unit> Send(IRequest request)
+        {
+            return Send<Unit>(request);
         }
     }
 }
