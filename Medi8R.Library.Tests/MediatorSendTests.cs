@@ -30,5 +30,20 @@ namespace Medi8R.Library.Tests
             // Assert
             Assert.That(result, Is.EqualTo("Handled: hello"));
         }
+
+        [Test]
+        public void Send_ThrowsIfHandlerNotRegistered()
+        {
+            // Arrange
+            StubRequest request = new("hello");
+
+            IMediator mediator = new Mediator(type => null!); // simulate missing handler
+
+            // Act & Assert
+            InvalidOperationException ex = Assert.ThrowsAsync<InvalidOperationException>(
+                async () => await mediator.Send(request));
+
+            Assert.That(ex.Message, Does.Contain("Handler not found"));
+        }
     }
 }
